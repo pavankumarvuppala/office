@@ -1,0 +1,77 @@
+<project default="run">
+	<taskdef resource="net/sf/antcontrib/antlib.xml" />
+
+	<property name="ai.platform.type" value="rbm" />
+	<property name="nVersion" value="RB_9.0.4.5600lx" />
+	<property name="nVersion1" value="RB_9.0.4.6" />
+	<property name="nVersion2" value="RB_9.0.3lX12c" />
+	<property name="nVersion3" value="RB_9.11.33lX18c" />
+
+	<target name="run">
+
+		<echo> Running the Validation of RB</echo>
+		<if>
+			<equals arg1="${ai.platform.type}" arg2="rbm" />
+			<then>
+				<echo> Into RBM mode</echo>
+				<!-- Senario 1 When release is 4 node with os and oracle version -->
+					<echo> Version=  ${nVersion}</echo>
+				<normalizeRBVersion version="${nVersion}"
+					normalizedVersion="nVersion" />
+				<echo> Normalized Version= ${nVersion}  </echo><echo> </echo>
+
+				<echo> Version= ${nVersion1} </echo>
+				<normalizeRBVersion version="${nVersion1}"
+					normalizedVersion="nVersion1" />
+				<echo> Normalized Version= ${nVersion1}  </echo><echo> </echo>
+
+				<!-- Senario 3 when release is 3 node with os and oracle version -->
+				<echo> Version= ${nVersion2} </echo>
+				<normalizeRBVersion version="${nVersion2}"
+					normalizedVersion="nVersion2" />
+				<echo> Normalized Version= ${nVersion2}  </echo><echo> </echo>
+
+				<!-- Senario 4 when release is 3 node without os and oracle version -->
+				<echo> Version= ${nVersion3} </echo>
+				<normalizeRBVersion version="${nVersion3}"
+					normalizedVersion="nVersion3" />
+				<echo> Normalized Version= ${nVersion3}  </echo><echo> </echo>
+			</then>
+		</if>
+
+	</target>
+
+
+	<macrodef name="normalizeRBVersion" description="extracts the version to be compared">
+		<attribute name="version" />
+		<attribute name="normalizedVersion" />
+		<sequential>
+			<if>
+				<equals arg1="@{version}" arg2="" />
+				<then>
+					<echo level="info" message="Version passed is empty to normalizeRBVersion" />
+				</then>
+				<else>			<!-- extract 3 nodes -->
+					<propertyregex property="@{normalizedVersion}" input="@{version}"
+						regexp="([a-zA-Z]+).(([0-9]+.[0-9]+.[0-9]+.[0-9]+)|([0-9]+.[0-9]+.[0-9]+))*"
+						select="\4" casesensitive="false" override="true" />
+					<if>
+						<or>
+							<not>
+								<isset property="@{normalizedVersion}" />
+							</not>
+							<equals arg1="${@{normalizedVersion}}" arg2="" />
+							<equals arg1="${@{normalizedVersion}}" arg2="$${@{normalizedVersion}}" />
+						</or>
+						<then>		<!-- extract 4 nodes -->
+							<propertyregex property="@{normalizedVersion}"
+								input="@{version}"
+								regexp="([a-zA-Z]+).(([0-9]+.[0-9]+.[0-9]+.[0-9]+)|([0-9]+.[0-9]+.[0-9]+))*"
+								select="\3" casesensitive="false" override="true" />
+						</then>
+					</if>
+				</else>
+			</if>
+		</sequential>
+	</macrodef>
+</project>
